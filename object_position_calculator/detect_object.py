@@ -4,41 +4,36 @@ import numpy as np
 from collections import defaultdict
 from ultralytics import YOLO
 import socketio
+import time
+import os
+from PIL import Image
 
-# Assuming you have socketio instance
-sio = socketio.Client()
 
 class YOLOTracker:
-    def __init__(self, model_path="yolo11n.pt"):
+    def __init__(self):
         # Load the YOLO model
-        self.model = YOLO(model_path)
-        self.track_history = defaultdict(lambda: [])
+        self.model = YOLO("best.pt")
+    
+    def process_image(self, image_filename):
+        # Open and process the image
+        frame = Image.open(image_filename)
+        # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # # Convert image to numpy array for YOLO
+        # frame = np.array(image)
 
-    def process_image(self, image_byte_array):
-        # Convert the byte array to a base64 string
-        image_base64 = base64.b64encode(bytes(image_byte_array)).decode('utf-8')
-        
-        # Decode the base64 image into an OpenCV image
-        img_data = base64.b64decode(image_base64)
-        np_arr = np.frombuffer(img_data, np.uint8)
-        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        
-        if frame is None:
-            print("Error: Could not decode image")
-            return None
-        
-        # Display the image
-        cv2.imshow("Captured Image", frame)
+        # Perform object detection
+        result = self.model.predict(frame, show=True, stream=False, conf=0.1)
 
-        
-        # Wait for a key press to close the window (use a small delay to update in real-time)
-        cv2.waitKey(1)
+        # Assuming we want to extract the center coordinates of detected objects
+        boxes = result[0].boxes.xyxy  # Bounding box coordinates (x_min, y_min, x_max, y_max)
 
-        return frame  # Optionally return the frame if further processing is needed
+        # Simulate detected coordinates (replace with actual object detection results)
+        detected_coordinates = []
 
+        for box in boxes:
+            x_min, y_min, x_max, y_max = box
+            center_x = int((x_min + x_max) / 2)
+            center_y = int((y_min + y_max) / 2)
+            detected_coordinates.append((center_x, center_y))
 
-    def encode_image_to_base64(self, frame):
-        """Encode an OpenCV frame into a base64 string."""
-        _, buffer = cv2.imencode('.jpg', frame)
-        return base64.b64encode(buffer).decode("utf-8")
-
+        return detected_coordinates

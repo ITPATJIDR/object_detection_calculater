@@ -50,16 +50,26 @@ class ObjectPositionCalculator:
         if current_frame_detections:
             return self.calculate_object_position(latitude, longitude, altitude, w, h)
         return None, None
-# Initialize the position calculator
-calculator = ObjectPositionCalculator(focal_length=1200, earth_radius=6371)
+if __name__ == "__main__":
+    # Initialize the position calculator
+    calculator = ObjectPositionCalculator(focal_length=1200, earth_radius=6371)
 
-# Calculate object position
-object_position = calculator.get_object_position(
-    current_frame_detections, latitude, longitude, altitude, x, y, object_width, object_height
-)
+    # Simulated inputs
+    current_frame_detections = True  # Assume objects were detected
+    latitude = 37.7749  # San Francisco latitude
+    longitude = -122.4194  # San Francisco longitude
+    altitude = 0.1  # Drone altitude in kilometers (100 meters)
+    x, y = 500, 300  # Object's position in the frame (not used)
+    object_width = 50  # Object width in pixels
+    object_height = 100  # Object height in pixels (not used currently)
 
-# Output
-if object_position != (None, None):
-    print("Detected Object Position (Latitude, Longitude):", object_position)
-else:
-    print("No object detected in the frame.")
+    # Calculate object position
+    object_position = calculator.get_object_position(
+        current_frame_detections, latitude, longitude, altitude, x, y, object_width, object_height
+    )
+
+    # Output
+    if object_position != (None, None):
+        print("Detected Object Position (Latitude, Longitude):", object_position)
+    else:
+        print("No object detected in the frame.")
