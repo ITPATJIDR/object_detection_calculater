@@ -10,8 +10,8 @@ from PIL import Image
 import io
 from ultralytics import YOLO
 from ultralytics.utils.plotting import Annotator
-from calculate import CoordinateCalculator
-from calculate2 import CoordinateCalculator2
+# from calculate import CoordinateCalculator
+from coordinate_calculator import CoordinateCalculator2
 sio = socketio.Client()
 
 lat, lng, heading, altitude, pitch, fov_h = None, None, None, None, None, None
@@ -130,20 +130,20 @@ def on_captured_image(data):
 
             
             # Instantiate the CoordinateCalculator with necessary parameters
-            pixel_to_meter_ratio = 0.01  # Example ratio: 1 pixel = 0.01 meters
-            calculator = CoordinateCalculator(
-                angle_deg=pitch,
-                bearing_deg=heading,
-                height=altitude,
-                gps_lat=lat,
-                gps_lng=lng,
-                image_size=(image_width, image_height),
-                detected_x=x,
-                detected_y=y,
-                pixel_to_meter_ratio=pixel_to_meter_ratio
-            )
+            # pixel_to_meter_ratio = 0.01  # Example ratio: 1 pixel = 0.01 meters
+            # calculator = CoordinateCalculator(
+            #     angle_deg=pitch,
+            #     bearing_deg=heading,
+            #     height=altitude,
+            #     gps_lat=lat,
+            #     gps_lng=lng,
+            #     image_size=(image_width, image_height),
+            #     detected_x=x,
+            #     detected_y=y,
+            #     pixel_to_meter_ratio=pixel_to_meter_ratio
+            # )
 
-            x_new, y_new, distance_pf_pixels, distance_pf_meters, bearing_from_center, xf_new, yf_new = calculator.main()
+            # x_new, y_new, distance_pf_pixels, distance_pf_meters, bearing_from_center, xf_new, yf_new = calculator.main()
 
             
             #Output the calculated results
@@ -189,7 +189,7 @@ def on_captured_image(data):
         
         
 # Connect to the server
-server_url = "http://10.109.68.49:8000"
+server_url = "http://192.168.0.141:8000"
 try:
     sio.connect(server_url)
     print(f"Connected to {server_url}")
@@ -239,3 +239,4 @@ send_drone_command("capture_img")
 
 # Wait for interactions
 sio.wait()
+
