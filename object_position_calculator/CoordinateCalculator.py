@@ -85,12 +85,12 @@ class CoordinateCalculator2:
 
 # Example Usage
 calculator = CoordinateCalculator2(
-    angle=30,
-    bearing=45,
-    height=25,
-    gps_x=50.0,
-    gps_y=100.0,
-    fov=90,
+    angle=-6.818268616370915e-08,
+    bearing=7.575611114501953,
+    height=25.0000057220459,
+    gps_x=14.040890243218062,
+    gps_y=100.61035146028303,
+    fov=106.70455169677734,
     image_width=640,
     image_height=640,
     detected_x=219.15426635742188,
@@ -98,5 +98,5 @@ calculator = CoordinateCalculator2(
 )
 
 results = calculator.calculate()
-# for key, value in results.items():
-#     print(f"{key}: {value}")
+for key, value in results.items():
+    print(f"{key}: {value}")

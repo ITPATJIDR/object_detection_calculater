@@ -119,7 +119,7 @@ def on_captured_image(data):
 
         # Process each detection
         for detected in detections:
-            image_width, image_height = 50, 50  # Image resolution
+            image_width, image_height = 640, 640  # Image resolution
             x, y = detected
 
             # Define the size of the bounding box (example: width=50, height=50)
@@ -127,6 +127,8 @@ def on_captured_image(data):
             top_left = (x - width // 2, y - height // 2)
             bottom_right = (x + width // 2, y + height // 2)
             cv2.rectangle(image, top_left, bottom_right, (0, 255, 0), 2)  # Green color, thickness=2
+            text_position = (top_left[0], top_left[1] - 40)  # Position the text above the top-left corner
+            cv2.putText(image, f"Position", text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
 
             
             # Instantiate the CoordinateCalculator with necessary parameters
@@ -146,14 +148,14 @@ def on_captured_image(data):
             # x_new, y_new, distance_pf_pixels, distance_pf_meters, bearing_from_center, xf_new, yf_new = calculator.main()
 
             
-            #Output the calculated results
-            print("=== CoordinateCalculator Results ===")
-            print(f"Ground Coordinates of G: ({lat}, {lng})")
-            print(f"New Coordinates of P: ({x_new:.6f}, {y_new:.6f})")
-            print(f"Distance in Pixels: {distance_pf_pixels:.2f} px")
-            print(f"Distance in Meters: {distance_pf_meters:.2f} m")
-            print(f"Bearing from Image Center: {bearing_from_center:.2f} degrees")
-            print(f"New Coordinates of F: ({xf_new:.6f}, {yf_new:.6f})")
+            # #Output the calculated results
+            # print("=== CoordinateCalculator Results ===")
+            # print(f"Ground Coordinates of G: ({lat}, {lng})")
+            # print(f"New Coordinates of P: ({x_new:.6f}, {y_new:.6f})")
+            # print(f"Distance in Pixels: {distance_pf_pixels:.2f} px")
+            # print(f"Distance in Meters: {distance_pf_meters:.2f} m")
+            # print(f"Bearing from Image Center: {bearing_from_center:.2f} degrees")
+            # print(f"New Coordinates of F: ({xf_new:.6f}, {yf_new:.6f})")
             
             calculator2 = CoordinateCalculator2(
                 angle=pitch,
@@ -168,7 +170,7 @@ def on_captured_image(data):
                 fov=fov_h
             )
 
-            # Perform the main calculation
+            #Perform the main calculation
             results = calculator2.calculate()
 
             # Output the calculated results
@@ -181,6 +183,13 @@ def on_captured_image(data):
             print(f"Bearing from Image Center: {results['Delta Bearing']:.2f} degrees")
             print(f"New Coordinates of F: {results['New Coordinates of F']}")
             print("\n")
+
+            text_position_1 = (top_left[0], top_left[1] - 10)  # Position the text above the top-left corner
+            cv2.putText(image, f"({round(results['New Coordinates of F'][0], 2)}, {round(results['New Coordinates of F'][1], 2)})", text_position_1, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+
+            # text_position = (top_left[0], bottom_right[1] + 20)  # Position the text below the bottom-right corner
+            # cv2.putText(image, f"Distance : {results['Distance in Meters']:.2f} m",
+            #             text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
             
         cv2.imshow("Image with Bounding Boxes", image)
         cv2.imwrite("test.png", image)
@@ -189,7 +198,7 @@ def on_captured_image(data):
         
         
 # Connect to the server
-server_url = "http://192.168.0.141:8000"
+server_url = "http://10.109.68.49:8000"
 try:
     sio.connect(server_url)
     print(f"Connected to {server_url}")
