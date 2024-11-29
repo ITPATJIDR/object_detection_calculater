@@ -61,6 +61,7 @@ class CoordinateCalculator2:
         radian_bearing = self.convert_bearing_to_radians(self.bearing)
         delta_x, delta_y = self.calculate_coordinate_change(d_principle, radian_bearing)
         new_x, new_y = self.calculate_new_coordinates(self.gps_x, self.gps_y, delta_x, delta_y)
+        print(new_x, new_y)
 
         # Step 8-10: Convert pixel distance to meters and calculate new bearing
         d_pixels = math.sqrt((self.detected_x - self.center_x)**2 + (self.detected_y - self.center_y)**2)
@@ -85,7 +86,7 @@ class CoordinateCalculator2:
 
 # Example Usage
 calculator = CoordinateCalculator2(
-    angle=-6.818268616370915e-08,
+    angle=90,
     bearing=7.575611114501953,
     height=25.0000057220459,
     gps_x=14.040890243218062,
@@ -93,8 +94,8 @@ calculator = CoordinateCalculator2(
     fov=106.70455169677734,
     image_width=640,
     image_height=640,
-    detected_x=219.15426635742188,
-    detected_y=439.4124755859375
+    detected_x=100,
+    detected_y=50
 )
 
 results = calculator.calculate()

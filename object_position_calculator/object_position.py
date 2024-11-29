@@ -13,8 +13,8 @@ from ultralytics.utils.plotting import Annotator
 # from calculate import CoordinateCalculator
 from coordinate_calculator import CoordinateCalculator2
 sio = socketio.Client()
-
-lat, lng, heading, altitude, pitch, fov_h = None, None, None, None, None, None
+from newCalculator import newCoordinateCalculator
+lat, lng, heading, altitude, pitch, fov_h, fov_v = None, None, None, None, None, None, None
 
 def render_image_from_base64(base64_image):
     # image_data = base64.b64decode(base64_image)
@@ -63,7 +63,7 @@ def disconnect():
 def data_to_yolo(data):
     room = data.get("room")
     # geo drone data
-    global lat, lng, heading, altitude, pitch, fov_h
+    global lat, lng, heading, altitude, pitch, fov_h, fov_v
     lat = data.get("lat")
     lng = data.get("lng")
     heading = data.get("heading")
@@ -75,7 +75,7 @@ def data_to_yolo(data):
     print(f'[{room}] Received data to yolo: {data}')
     
     # do anything from this for calculation of estimation 
-    return lat, lng, heading, altitude, pitch, fov_h
+    return lat, lng, heading, altitude, pitch, fov_h, fov_v
 
 
 
@@ -103,7 +103,7 @@ def on_captured_image(data):
 
         print("\n")
         print("Drone geo data")
-        print(lat, lng, heading, altitude, pitch, fov_h)
+        print(lat, lng, heading, altitude, pitch, fov_v)
         print("\n")
         
         # Run object detection
@@ -157,44 +157,79 @@ def on_captured_image(data):
             # print(f"Bearing from Image Center: {bearing_from_center:.2f} degrees")
             # print(f"New Coordinates of F: ({xf_new:.6f}, {yf_new:.6f})")
             
-            calculator2 = CoordinateCalculator2(
-                angle=pitch,
-                bearing=heading,
-                height=altitude,
-                gps_x=lat,
-                gps_y=lng,
-                image_width=image_width,
-                image_height=image_height,
-                detected_x=x,
-                detected_y=y,
-                fov=fov_h
-            )
+            # calculator2 = CoordinateCalculator2(
+            #     angle=pitch,
+            #     bearing=heading,
+            #     height=altitude,
+            #     gps_x=lat,
+            #     gps_y=lng,
+            #     image_width=image_width,
+            #     image_height=image_height,
+            #     detected_x=x,
+            #     detected_y=y,
+            #     fov=fov_h
+            # )
 
-            #Perform the main calculation
-            results = calculator2.calculate()
+            # #Perform the main calculation
+            # results = calculator2.calculate()
 
-            # Output the calculated results
+            # # Output the calculated results
             
-            print(f"CoordinateCalculator Results")
-            print(f"Ground Coordinates of G: {results['Ground Coordinates of G']}")
-            print(f"New Coordinates of P: {results['New Coordinates of P']}")
-            print(f"Distance in Pixels: {results['Distance in Pixels']:.2f} px")
-            print(f"Distance in Meters: {results['Distance in Meters']:.2f} m")
-            print(f"Bearing from Image Center: {results['Delta Bearing']:.2f} degrees")
-            print(f"New Coordinates of F: {results['New Coordinates of F']}")
-            print("\n")
-
+            # print(f"CoordinateCalculator Results1")
+            # print(f"Ground Coordinates of G: {results['Ground Coordinates of G']}")
+            # print(f"New Coordinates of P: {results['New Coordinates of P']}")
+            # print(f"Distance in Pixels: {results['Distance in Pixels']:.2f} px")
+            # print(f"Distance in Meters: {results['Distance in Meters']:.2f} m")
+            # print(f"Bearing from Image Center: {results['Delta Bearing']:.2f} degrees")
+            # print(f"New Coordinates of F: {results['New Coordinates of F']}")
+            # print("\n")
+            calculator = newCoordinateCalculator(
+                angle=pitch,                # มุมกล้อง
+                height=altitude,              # ความสูงของกล้อง (เมตร)
+                gps_lat=lat,       # ละติจูดจุด G
+                gps_lon=lng,      # ลองจิจูดจุด G
+                image_width=image_width,         # ความกว้างของภาพ
+                image_height=image_height,        # ความสูงของภาพ
+                detected_x=x,          # พิกัด X ของจุด F ในภาพ
+                detected_y=y,          # พิกัด Y ของจุด F ในภาพ
+                fov =fov_h,
+                bearing=heading
+            )
+            
+            results2 = calculator.calculate_coordinates()
+            print("Calculation Results2:")
+            print(f"GPS Latitude, Longitude: {calculator.gps_lat}, {calculator.gps_lon}")
+            print(f"1. Principle Distance (P): {results2['principle_distance']:.2f} meters")
+            print(f"2. Horizontal Distance (d): {results2['horizontal_distance']:.2f} meters")
+            print(f"3. Coordinates of Point P: Latitude {results2['coordinates_p'][0]:.15f}, Longitude {results2['coordinates_p'][1]:.15f}")
+            print(f"4. Coordinates of Point F: Latitude {results2['coordinates_f'][0]:.15f}, Longitude {results2['coordinates_f'][1]:.15f}")
+            print(f"5. Distance between G and F: {results2['distance_gf']:.2f} meters")
+            print(f"6. Bearing Offset to Point F: {results2['bearing_offset']:.2f} degrees")
+            
             text_position_1 = (top_left[0], top_left[1] - 10)  # Position the text above the top-left corner
-            cv2.putText(image, f"({round(results['New Coordinates of F'][0], 2)}, {round(results['New Coordinates of F'][1], 2)})", text_position_1, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+            cv2.putText(image, f"({results2['coordinates_f'][0]:.15f}, {results2['coordinates_f'][1]:.15f})", text_position_1, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
 
             # text_position = (top_left[0], bottom_right[1] + 20)  # Position the text below the bottom-right corner
             # cv2.putText(image, f"Distance : {results['Distance in Meters']:.2f} m",
             #             text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-            
+
+        
+        SAVE_DETECTION_FOLDER = 'detected_images'
+        detect_image = SAVE_DETECTION_FOLDER + "/" +"dectect_image_" + timestamp + ".png"
         cv2.imshow("Image with Bounding Boxes", image)
-        cv2.imwrite("test.png", image)
+        cv2.imwrite(detect_image, image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
+        image = cv2.imread(detect_image)
+        success, encoded_image = cv2.imencode('.png', image)
+
+        if success:
+            # Convert the encoded buffer to a bytes array
+            image_bytes = encoded_image.tobytes()
+            print(f"Image converted to bytes array: {image_bytes[:20]}...")  # Display first 20 bytes as a sample
+        else:
+            print("Error encoding image.")
         
         
 # Connect to the server
