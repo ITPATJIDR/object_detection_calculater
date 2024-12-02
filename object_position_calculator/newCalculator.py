@@ -12,7 +12,7 @@ class newCoordinateCalculator:
         self.detected_y = detected_y
         self.center_x = image_width / 2
         self.center_y = image_height / 2
-        self.fov = fov  # Field of View in degrees
+        self.fov = fov 
         self.bearing = bearing,
 
     def calculate_principle_point_distance(self):
@@ -22,7 +22,7 @@ class newCoordinateCalculator:
     def calculate_distance(self, principle_distance):
         """Calculate horizontal distance from principle point."""
         return math.sqrt(principle_distance**2 - self.height**2)
-
+    
     def haversine_distance(self, lat1, lon1, lat2, lon2):
         """Calculate Haversine distance between two latitude/longitude points."""
         R = 6371e3  # Earth's radius in meters
@@ -34,6 +34,13 @@ class newCoordinateCalculator:
         a = math.sin(d_lat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(d_lon / 2)**2
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         return R * c
+    
+    def euclideain_distance(self,  lat_f, lng_f):
+        """Calculate Haversine distance between two latitude/longitude points."""
+        d_lat = (self.gps_lat - lat_f)**2
+        d_lon = (self.gps_lon - lng_f)**2
+        d = d_lat + d_lon + self.height**2
+        return math.sqrt(d)
 
     def pixels_to_meters(self, d_pixels):
         """Convert pixel distance to meters."""
@@ -49,7 +56,6 @@ class newCoordinateCalculator:
     def haversine_new_coordinates(self, lat, lon, distance, bearing):
         """Calculate new latitude and longitude from a point using distance and bearing."""
         R = 6371e3  # Earth's radius in meters
-        print(self.bearing)
         bearing = math.radians(self.bearing[0])
 
         lat = math.radians(lat)

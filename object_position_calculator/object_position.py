@@ -119,7 +119,8 @@ def on_captured_image(data):
 
         # Process each detection
         for detected in detections:
-            image_width, image_height = 640, 640  # Image resolution
+            print(image.shape)
+            image_height, image_width = image.shape[:2]
             x, y = detected
 
             # Define the size of the bounding box (example: width=50, height=50)
@@ -130,59 +131,7 @@ def on_captured_image(data):
             text_position = (top_left[0], top_left[1] - 40)  # Position the text above the top-left corner
             cv2.putText(image, f"Position", text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
 
-            
-            # Instantiate the CoordinateCalculator with necessary parameters
-            # pixel_to_meter_ratio = 0.01  # Example ratio: 1 pixel = 0.01 meters
-            # calculator = CoordinateCalculator(
-            #     angle_deg=pitch,
-            #     bearing_deg=heading,
-            #     height=altitude,
-            #     gps_lat=lat,
-            #     gps_lng=lng,
-            #     image_size=(image_width, image_height),
-            #     detected_x=x,
-            #     detected_y=y,
-            #     pixel_to_meter_ratio=pixel_to_meter_ratio
-            # )
-
-            # x_new, y_new, distance_pf_pixels, distance_pf_meters, bearing_from_center, xf_new, yf_new = calculator.main()
-
-            
-            # #Output the calculated results
-            # print("=== CoordinateCalculator Results ===")
-            # print(f"Ground Coordinates of G: ({lat}, {lng})")
-            # print(f"New Coordinates of P: ({x_new:.6f}, {y_new:.6f})")
-            # print(f"Distance in Pixels: {distance_pf_pixels:.2f} px")
-            # print(f"Distance in Meters: {distance_pf_meters:.2f} m")
-            # print(f"Bearing from Image Center: {bearing_from_center:.2f} degrees")
-            # print(f"New Coordinates of F: ({xf_new:.6f}, {yf_new:.6f})")
-            
-            # calculator2 = CoordinateCalculator2(
-            #     angle=pitch,
-            #     bearing=heading,
-            #     height=altitude,
-            #     gps_x=lat,
-            #     gps_y=lng,
-            #     image_width=image_width,
-            #     image_height=image_height,
-            #     detected_x=x,
-            #     detected_y=y,
-            #     fov=fov_h
-            # )
-
-            # #Perform the main calculation
-            # results = calculator2.calculate()
-
-            # # Output the calculated results
-            
-            # print(f"CoordinateCalculator Results1")
-            # print(f"Ground Coordinates of G: {results['Ground Coordinates of G']}")
-            # print(f"New Coordinates of P: {results['New Coordinates of P']}")
-            # print(f"Distance in Pixels: {results['Distance in Pixels']:.2f} px")
-            # print(f"Distance in Meters: {results['Distance in Meters']:.2f} m")
-            # print(f"Bearing from Image Center: {results['Delta Bearing']:.2f} degrees")
-            # print(f"New Coordinates of F: {results['New Coordinates of F']}")
-            # print("\n")
+    
             calculator = newCoordinateCalculator(
                 angle=pitch,                # มุมกล้อง
                 height=altitude,              # ความสูงของกล้อง (เมตร)
@@ -192,7 +141,7 @@ def on_captured_image(data):
                 image_height=image_height,        # ความสูงของภาพ
                 detected_x=x,          # พิกัด X ของจุด F ในภาพ
                 detected_y=y,          # พิกัด Y ของจุด F ในภาพ
-                fov =fov_h,
+                fov =fov_v,
                 bearing=heading
             )
             
@@ -203,30 +152,34 @@ def on_captured_image(data):
             print(f"2. Horizontal Distance (d): {results2['horizontal_distance']:.2f} meters")
             print(f"3. Coordinates of Point P: Latitude {results2['coordinates_p'][0]:.15f}, Longitude {results2['coordinates_p'][1]:.15f}")
             print(f"4. Coordinates of Point F: Latitude {results2['coordinates_f'][0]:.15f}, Longitude {results2['coordinates_f'][1]:.15f}")
-            print(f"5. Distance between G and F: {results2['distance_gf']:.2f} meters")
+            print(f"5. Distance between G and F: {results2['distance_gf']} meters")
             print(f"6. Bearing Offset to Point F: {results2['bearing_offset']:.2f} degrees")
             
             text_position_1 = (top_left[0], top_left[1] - 10)  # Position the text above the top-left corner
             cv2.putText(image, f"({results2['coordinates_f'][0]:.15f}, {results2['coordinates_f'][1]:.15f})", text_position_1, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
             
             text_position = (top_left[0], bottom_right[1] + 20)  # Position the text below the bottom-right corner
-            cv2.putText(image, f"5. Distance between G and F: {results2['distance_gf']:.2f} meters", text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+            cv2.putText(image, f"Distance between G and F: {results2['distance_gf']} meters", text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
 
         
         SAVE_DETECTION_FOLDER = 'detected_images'
         detect_image = SAVE_DETECTION_FOLDER + "/" +"dectect_image_" + timestamp + ".png"
-        cv2.imshow("Image with Bounding Boxes", image)
+        # cv2.imshow("Image with Bounding Boxes", image)
         cv2.imwrite(detect_image, image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
         image = cv2.imread(detect_image)
         success, encoded_image = cv2.imencode('.png', image)
 
         if success:
             # Convert the encoded buffer to a bytes array
+            print("HI")
             image_bytes = encoded_image.tobytes()
+            room = "drone"
             print(f"Image converted to bytes array: {image_bytes[:20]}...")  # Display first 20 bytes as a sample
+            sio.emit('send_image', {'room': room, 'image_byte_array': image_bytes, "requester": "webapp"})
+            print("Sent image")
         else:
             print("Error encoding image.")
         
