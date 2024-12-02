@@ -10,10 +10,10 @@ from PIL import Image
 import io
 from ultralytics import YOLO
 from ultralytics.utils.plotting import Annotator
-# from calculate import CoordinateCalculator
 from coordinate_calculator import CoordinateCalculator2
-sio = socketio.Client()
 from newCalculator import newCoordinateCalculator
+
+sio = socketio.Client()
 lat, lng, heading, altitude, pitch, fov_h, fov_v = None, None, None, None, None, None, None
 
 def render_image_from_base64(base64_image):
@@ -208,10 +208,9 @@ def on_captured_image(data):
             
             text_position_1 = (top_left[0], top_left[1] - 10)  # Position the text above the top-left corner
             cv2.putText(image, f"({results2['coordinates_f'][0]:.15f}, {results2['coordinates_f'][1]:.15f})", text_position_1, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-
-            # text_position = (top_left[0], bottom_right[1] + 20)  # Position the text below the bottom-right corner
-            # cv2.putText(image, f"Distance : {results['Distance in Meters']:.2f} m",
-            #             text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+            
+            text_position = (top_left[0], bottom_right[1] + 20)  # Position the text below the bottom-right corner
+            cv2.putText(image, f"5. Distance between G and F: {results2['distance_gf']:.2f} meters", text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
 
         
         SAVE_DETECTION_FOLDER = 'detected_images'
