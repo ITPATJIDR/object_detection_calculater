@@ -77,7 +77,9 @@ def data_to_yolo(data):
     # do anything from this for calculation of estimation 
     return lat, lng, heading, altitude, pitch, fov_h, fov_v
 
-
+@sio.on("response_groudtruth")
+def test(data):
+    print(data)
 
 @sio.on("captured_image")
 def on_captured_image(data):
@@ -152,14 +154,14 @@ def on_captured_image(data):
             print(f"2. Horizontal Distance (d): {results2['horizontal_distance']:.2f} meters")
             print(f"3. Coordinates of Point P: Latitude {results2['coordinates_p'][0]:.15f}, Longitude {results2['coordinates_p'][1]:.15f}")
             print(f"4. Coordinates of Point F: Latitude {results2['coordinates_f'][0]:.15f}, Longitude {results2['coordinates_f'][1]:.15f}")
-            print(f"5. Distance between G and F: {results2['distance_gf']} meters")
+            print(f"5. Distance between G and F: {results2['distance_gf']:.8f} meters")
             print(f"6. Bearing Offset to Point F: {results2['bearing_offset']:.2f} degrees")
             
             text_position_1 = (top_left[0], top_left[1] - 10)  # Position the text above the top-left corner
             cv2.putText(image, f"({results2['coordinates_f'][0]:.15f}, {results2['coordinates_f'][1]:.15f})", text_position_1, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
             
             text_position = (top_left[0], bottom_right[1] + 20)  # Position the text below the bottom-right corner
-            cv2.putText(image, f"Distance between G and F: {results2['distance_gf']} meters", text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+            cv2.putText(image, f"Distance between G and F: {results2['distance_gf']:.8f} meters", text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
 
         
         SAVE_DETECTION_FOLDER = 'detected_images'

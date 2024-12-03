@@ -17,7 +17,7 @@ class newCoordinateCalculator:
 
     def calculate_principle_point_distance(self):
         """Calculate principle point distance."""
-        return self.height / math.cos(math.radians(self.angle))
+        return self.height / math.cos((math.radians(self.angle)))
 
     def calculate_distance(self, principle_distance):
         """Calculate horizontal distance from principle point."""
